@@ -1,94 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title> PS Billing System</title>
-<link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <div class="container" role="main" aria-label="Responsive PS Billing System">
-    <div class="part" id="part-TV1">
-      <h3>TV 1</h3>
-      <select aria-label="Select rental duration for TV 1"></select>
-      <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
-      <div class="btn-group">
-        <button class="btn btn-generate">Generate</button>
-        <button class="btn btn-pause" disabled>Pause</button>
-        <button class="btn btn-unpause" disabled>Unpause</button>
-        <button class="btn btn-cancel" disabled>Cancel</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PS Billing System with Pause All</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <button
+      id="pauseAllBtn"
+      aria-label="Pause All Timers"
+      title="Pause All Timers"
+      style="
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        padding: 10px 16px;
+        background: #facc15;
+        color: #202020;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 1000;
+        box-shadow: 0 0 8px #eab308;
+        user-select: none;
+        transition: background-color 0.3s ease;
+      "
+    >
+      Pause All
+    </button>
+    <button
+      id="unpauseAllBtn"
+      aria-label="Unpause All Timers"
+      title="Unpause All Timers"
+      style="
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        padding: 10px 16px;
+        background: #22c55e;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 1000;
+        box-shadow: 0 0 8px #16a34a;
+        user-select: none;
+        transition: background-color 0.3s ease;
+        display: none;
+      "
+    >
+      Unpause All
+    </button>
+
+    <div
+      class="container"
+      role="main"
+      aria-label="Responsive PS Billing System with Pause All"
+    >
+      <div class="part" id="part-TV1">
+        <h3>TV 1</h3>
+        <select aria-label="Select rental duration for TV 1"></select>
+        <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
+        <div class="btn-group">
+          <button class="btn btn-generate">Generate</button>
+          <button class="btn btn-pause" disabled>Pause</button>
+          <button class="btn btn-unpause" disabled>Unpause</button>
+          <button class="btn btn-cancel" disabled>Cancel</button>
+        </div>
       </div>
-    </div>
-    <div class="part" id="part-TV2">
-      <h3>TV 2</h3>
-      <select aria-label="Select rental duration for TV 2"></select>
-      <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
-      <div class="btn-group">
-        <button class="btn btn-generate">Generate</button>
-        <button class="btn btn-pause" disabled>Pause</button>
-        <button class="btn btn-unpause" disabled>Unpause</button>
-        <button class="btn btn-cancel" disabled>Cancel</button>
+      <div class="part" id="part-TV2">
+        <h3>TV 2</h3>
+        <select aria-label="Select rental duration for TV 2"></select>
+        <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
+        <div class="btn-group">
+          <button class="btn btn-generate">Generate</button>
+          <button class="btn btn-pause" disabled>Pause</button>
+          <button class="btn btn-unpause" disabled>Unpause</button>
+          <button class="btn btn-cancel" disabled>Cancel</button>
+        </div>
       </div>
-    </div>
-    <div class="part" id="part-TV3">
-      <h3>TV 3</h3>
-      <select aria-label="Select rental duration for TV 3"></select>
-      <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
-      <div class="btn-group">
-        <button class="btn btn-generate">Generate</button>
-        <button class="btn btn-pause" disabled>Pause</button>
-        <button class="btn btn-unpause" disabled>Unpause</button>
-        <button class="btn btn-cancel" disabled>Cancel</button>
+      <div class="part" id="part-TV3">
+        <h3>TV 3</h3>
+        <select aria-label="Select rental duration for TV 3"></select>
+        <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
+        <div class="btn-group">
+          <button class="btn btn-generate">Generate</button>
+          <button class="btn btn-pause" disabled>Pause</button>
+          <button class="btn btn-unpause" disabled>Unpause</button>
+          <button class="btn btn-cancel" disabled>Cancel</button>
+        </div>
       </div>
-    </div>
-    <div class="part" id="part-TV4">
-      <h3>TV 4</h3>
-      <select aria-label="Select rental duration for TV 4"></select>
-      <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
-      <div class="btn-group">
-        <button class="btn btn-generate">Generate</button>
-        <button class="btn btn-pause" disabled>Pause</button>
-        <button class="btn btn-unpause" disabled>Unpause</button>
-        <button class="btn btn-cancel" disabled>Cancel</button>
+      <div class="part" id="part-TV4">
+        <h3>TV 4</h3>
+        <select aria-label="Select rental duration for TV 4"></select>
+        <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
+        <div class="btn-group">
+          <button class="btn btn-generate">Generate</button>
+          <button class="btn btn-pause" disabled>Pause</button>
+          <button class="btn btn-unpause" disabled>Unpause</button>
+          <button class="btn btn-cancel" disabled>Cancel</button>
+        </div>
       </div>
-    </div>
-    <div class="part" id="part-TV5">
-      <h3>TV 5</h3>
-      <select aria-label="Select rental duration for TV 5"></select>
-      <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
-      <div class="btn-group">
-        <button class="btn btn-generate">Generate</button>
-        <button class="btn btn-pause" disabled>Pause</button>
-        <button class="btn btn-unpause" disabled>Unpause</button>
-        <button class="btn btn-cancel" disabled>Cancel</button>
+      <div class="part" id="part-TV5">
+        <h3>TV 5</h3>
+        <select aria-label="Select rental duration for TV 5"></select>
+        <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
+        <div class="btn-group">
+          <button class="btn btn-generate">Generate</button>
+          <button class="btn btn-pause" disabled>Pause</button>
+          <button class="btn btn-unpause" disabled>Unpause</button>
+          <button class="btn btn-cancel" disabled>Cancel</button>
+        </div>
       </div>
-    </div>
-    <div class="part" id="part-TV6">
-      <h3>TV 6</h3>
-      <select aria-label="Select rental duration for TV 6"></select>
-      <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
-      <div class="btn-group">
-        <button class="btn btn-generate">Generate</button>
-        <button class="btn btn-pause" disabled>Pause</button>
-        <button class="btn btn-unpause" disabled>Unpause</button>
-        <button class="btn btn-cancel" disabled>Cancel</button>
+      <div class="part" id="part-TV6">
+        <h3>TV 6</h3>
+        <select aria-label="Select rental duration for TV 6"></select>
+        <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
+        <div class="btn-group">
+          <button class="btn btn-generate">Generate</button>
+          <button class="btn btn-pause" disabled>Pause</button>
+          <button class="btn btn-unpause" disabled>Unpause</button>
+          <button class="btn btn-cancel" disabled>Cancel</button>
+        </div>
       </div>
-    </div>
-    <div class="part" id="part-PS4">
-      <h3>PS4</h3>
-      <select aria-label="Select rental duration for PS4"></select>
-      <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
-      <div class="btn-group">
-        <button class="btn btn-generate">Generate</button>
-        <button class="btn btn-pause" disabled>Pause</button>
-        <button class="btn btn-unpause" disabled>Unpause</button>
-        <button class="btn btn-cancel" disabled>Cancel</button>
+      <div class="part" id="part-PS4">
+        <h3>PS4</h3>
+        <select aria-label="Select rental duration for PS4"></select>
+        <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
+        <div class="btn-group">
+          <button class="btn btn-generate">Generate</button>
+          <button class="btn btn-pause" disabled>Pause</button>
+          <button class="btn btn-unpause" disabled>Unpause</button>
+          <button class="btn btn-cancel" disabled>Cancel</button>
+        </div>
       </div>
+      <div
+        class="receipt"
+        id="receiptArea"
+        aria-live="polite"
+        tabindex="0"
+      ></div>
     </div>
-    <div class="receipt" id="receiptArea" aria-live="polite" tabindex="0"></div>
-  </div>
-<script src="script.js"></script>
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>
-</content>
-</create_file>
