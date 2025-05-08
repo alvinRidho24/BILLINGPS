@@ -113,7 +113,6 @@
       } else if (endTime) {
         timerDisplay.textContent = "Time's up! ⏰";
         delete countdowns[partId];
-        billingHistory[key].shift();
         renderReceipt();
       } else {
         timerDisplay.textContent = "";
@@ -261,6 +260,36 @@
     pauseBtn.disabled = true;
     unpauseBtn.disabled = true;
     cancelBtn.disabled = true;
+  });
+
+  // Event listeners for Pause All and Unpause All buttons
+  document.getElementById("pauseAllBtn").addEventListener("click", () => {
+    Object.keys(parts).forEach((partId) => {
+      if (countdowns[partId] && !paused[partId]) {
+        const remaining = countdowns[partId] - Date.now();
+        if (remaining > 0) {
+          paused[partId] = remaining;
+          delete countdowns[partId];
+        }
+      }
+    });
+    updateTimers();
+    renderReceipt();
+    document.getElementById("pauseAllBtn").style.display = "none";
+    document.getElementById("unpauseAllBtn").style.display = "block";
+  });
+
+  document.getElementById("unpauseAllBtn").addEventListener("click", () => {
+    Object.keys(parts).forEach((partId) => {
+      if (paused[partId]) {
+        countdowns[partId] = Date.now() + paused[partId];
+        delete paused[partId];
+      }
+    });
+    startTimerInterval();
+    updateTimers();
+    document.getElementById("unpauseAllBtn").style.display = "none";
+    document.getElementById("pauseAllBtn").style.display = "block";
   });
 
   initSelects();
