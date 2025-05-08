@@ -1,14 +1,6 @@
-/* Removed invalid path/container block */
-
 * {
   box-sizing: border-box;
 }
-
-h1 {
-  text-align: center;
-  margin-top: 20px;
-}
-
 body {
   margin: 0;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -20,7 +12,6 @@ body {
   min-height: 100vh;
   box-sizing: border-box;
 }
-
 .container {
   background: linear-gradient(145deg, #1f2937, #111827);
   border-radius: 12px;
@@ -32,7 +23,6 @@ body {
   grid-template-columns: repeat(2, 1fr);
   grid-gap: 20px;
 }
-
 @media (max-width: 600px) {
   .container {
     grid-template-columns: 1fr;
@@ -40,7 +30,6 @@ body {
     max-width: 100%;
   }
 }
-
 .part {
   background: #212b40;
   border-radius: 12px;
@@ -51,7 +40,6 @@ body {
   padding: 15px;
   user-select: none;
 }
-
 .part h3 {
   color: #60a5fa;
   margin-bottom: 12px;
@@ -60,7 +48,6 @@ body {
   font-size: 1.25rem;
   text-align: center;
 }
-
 select {
   width: 100%;
   padding: 8px 10px;
@@ -72,7 +59,6 @@ select {
   outline-offset: 2px;
   margin-bottom: 6px;
 }
-
 .timer-display {
   margin-top: 8px;
   color: #f87171;
@@ -82,7 +68,6 @@ select {
   min-height: 24px;
   text-align: center;
 }
-
 .btn-group {
   margin-top: 10px;
   width: 100%;
@@ -90,7 +75,6 @@ select {
   gap: 6px;
   justify-content: center;
 }
-
 button.btn {
   flex: 1;
   padding: 8px 0;
@@ -103,40 +87,31 @@ button.btn {
   user-select: none;
   transition: background-color 0.3s ease;
 }
-
 button.btn-generate {
   background-color: #2563eb;
 }
-
-button.btn-generate:hover {
+button.btn-generate:hover:not(:disabled) {
   background-color: #1e40af;
 }
-
 button.btn-pause {
   background-color: #facc15;
   color: #202020;
 }
-
-button.btn-pause:hover {
+button.btn-pause:hover:not(:disabled) {
   background-color: #eab308;
 }
-
 button.btn-unpause {
   background-color: #22c55e;
 }
-
-button.btn-unpause:hover {
+button.btn-unpause:hover:not(:disabled) {
   background-color: #16a34a;
 }
-
 button.btn-cancel {
   background-color: #ef4444;
 }
-
-button.btn-cancel:hover {
+button.btn-cancel:hover:not(:disabled) {
   background-color: #b91c1c;
 }
-
 .receipt {
   grid-column: 1 / -1;
   background: #111827;
@@ -149,7 +124,6 @@ button.btn-cancel:hover {
   color: #a5b4fc;
   user-select: text;
 }
-
 .receipt-section {
   border: 1px solid #303a50;
   border-radius: 8px;
@@ -157,7 +131,6 @@ button.btn-cancel:hover {
   background: #1e2638;
   margin-bottom: 10px;
 }
-
 .receipt-section-header {
   font-weight: 700;
   color: #60a5fa;
@@ -165,13 +138,11 @@ button.btn-cancel:hover {
   border-bottom: 1px solid #334766;
   user-select: none;
 }
-
 .receipt-lines {
   margin-top: 6px;
   font-family: monospace, monospace;
   white-space: pre-wrap;
 }
-
 .total-overall {
   font-weight: 900;
   font-size: 1.3rem;
