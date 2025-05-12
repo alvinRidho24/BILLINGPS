@@ -1,150 +1,181 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PS Billing System with Pause All</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistem Billing Warnet PS</title>
     <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
   </head>
-
   <body>
-    <button
-      id="pauseAllBtn"
-      aria-label="Pause All Timers"
-      title="Pause All Timers"
-      style="
-        position: fixed;
-        top: 15px;
-        right: 15px;
-        padding: 10px 16px;
-        background: #facc15;
-        color: #202020;
-        border: none;
-        border-radius: 6px;
-        font-weight: bold;
-        cursor: pointer;
-        z-index: 1000;
-        box-shadow: 0 0 8px #eab308;
-        user-select: none;
-        transition: background-color 0.3s ease;
-      "
-    >
-      Pause All
-    </button>
-    <button
-      id="unpauseAllBtn"
-      aria-label="Unpause All Timers"
-      title="Unpause All Timers"
-      style="
-        position: fixed;
-        top: 15px;
-        right: 15px;
-        padding: 10px 16px;
-        background: #22c55e;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-weight: bold;
-        cursor: pointer;
-        z-index: 1000;
-        box-shadow: 0 0 8px #16a34a;
-        user-select: none;
-        transition: background-color 0.3s ease;
-        display: none;
-      "
-    >
-      Unpause All
-    </button>
+    <div class="container">
+      <h1>Sistem Billing Warnet PS</h1>
 
-    <div
-      class="container"
-      role="main"
-      aria-label="Responsive PS Billing System with Pause All"
-    >
-      <div class="part" id="part-TV1">
-        <h3>TV 1</h3>
-        <select aria-label="Select rental duration for TV 1"></select>
-        <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
-        <div class="btn-group">
-          <button class="btn btn-generate">Generate</button>
-          <button class="btn btn-pause" disabled>Pause</button>
-          <button class="btn btn-unpause" disabled>Unpause</button>
-          <button class="btn btn-cancel" disabled>Cancel</button>
+      <div class="devices-grid">
+        <!-- TV 1 -->
+        <div class="device" id="TV1">
+          <h3>TV 1 (PS3)</h3>
+          <select>
+            <option value="10">10 Menit (Gratis)</option>
+            <option value="30">30 Menit (Rp5.000)</option>
+            <option value="60">1 Jam (Rp9.000)</option>
+            <option value="90">1 Jam 30 Menit (Rp14.000)</option>
+            <option value="120">2 Jam (Rp18.000)</option>
+            <option value="150">2 Jam 30 Menit (Rp23.000)</option>
+            <option value="180">3 Jam (Rp27.000)</option>
+          </select>
+          <div class="timer-display"></div>
+          <div class="btn-group">
+            <button class="btn btn-start">Mulai</button>
+            <button class="btn btn-pause" disabled>Jeda</button>
+            <button class="btn btn-resume" disabled>Lanjut</button>
+            <button class="btn btn-stop" disabled>Stop</button>
+            <button class="btn btn-cancel" disabled>Cancel</button>
+          </div>
+        </div>
+
+        <!-- TV 2-6 dan PS4 dengan struktur yang sama -->
+
+        <div class="device" id="TV2">
+          <h3>TV 2 (PS3)</h3>
+          <select>
+            <option value="10">10 Menit (Gratis)</option>
+            <option value="30">30 Menit (Rp5.000)</option>
+            <option value="60">1 Jam (Rp9.000)</option>
+            <option value="90">1 Jam 30 Menit (Rp14.000)</option>
+            <option value="120">2 Jam (Rp18.000)</option>
+            <option value="150">2 Jam 30 Menit (Rp23.000)</option>
+            <option value="180">3 Jam (Rp27.000)</option>
+          </select>
+          <div class="timer-display"></div>
+          <div class="btn-group">
+            <button class="btn btn-start">Mulai</button>
+            <button class="btn btn-pause" disabled>Jeda</button>
+            <button class="btn btn-resume" disabled>Lanjut</button>
+            <button class="btn btn-stop" disabled>Stop</button>
+            <button class="btn btn-cancel" disabled>Cancel</button>
+          </div>
+        </div>
+
+        <div class="device" id="TV3">
+          <h3>TV 3 (PS3)</h3>
+          <select>
+            <option value="10">10 Menit (Gratis)</option>
+            <option value="30">30 Menit (Rp5.000)</option>
+            <option value="60">1 Jam (Rp9.000)</option>
+            <option value="90">1 Jam 30 Menit (Rp14.000)</option>
+            <option value="120">2 Jam (Rp18.000)</option>
+            <option value="150">2 Jam 30 Menit (Rp23.000)</option>
+            <option value="180">3 Jam (Rp27.000)</option>
+          </select>
+          <div class="timer-display"></div>
+          <div class="btn-group">
+            <button class="btn btn-start">Mulai</button>
+            <button class="btn btn-pause" disabled>Jeda</button>
+            <button class="btn btn-resume" disabled>Lanjut</button>
+            <button class="btn btn-stop" disabled>Stop</button>
+            <button class="btn btn-cancel" disabled>Cancel</button>
+          </div>
+        </div>
+
+        <div class="device" id="TV4">
+          <h3>TV 4 (PS3)</h3>
+          <select>
+            <option value="10">10 Menit (Gratis)</option>
+            <option value="30">30 Menit (Rp5.000)</option>
+            <option value="60">1 Jam (Rp9.000)</option>
+            <option value="90">1 Jam 30 Menit (Rp14.000)</option>
+            <option value="120">2 Jam (Rp18.000)</option>
+            <option value="150">2 Jam 30 Menit (Rp23.000)</option>
+            <option value="180">3 Jam (Rp27.000)</option>
+          </select>
+          <div class="timer-display"></div>
+          <div class="btn-group">
+            <button class="btn btn-start">Mulai</button>
+            <button class="btn btn-pause" disabled>Jeda</button>
+            <button class="btn btn-resume" disabled>Lanjut</button>
+            <button class="btn btn-stop" disabled>Stop</button>
+            <button class="btn btn-cancel" disabled>Cancel</button>
+          </div>
+        </div>
+
+        <div class="device" id="TV5">
+          <h3>TV 5 (PS3)</h3>
+          <select>
+            <option value="10">10 Menit (Gratis)</option>
+            <option value="30">30 Menit (Rp5.000)</option>
+            <option value="60">1 Jam (Rp9.000)</option>
+            <option value="90">1 Jam 30 Menit (Rp14.000)</option>
+            <option value="120">2 Jam (Rp18.000)</option>
+            <option value="150">2 Jam 30 Menit (Rp23.000)</option>
+            <option value="180">3 Jam (Rp27.000)</option>
+          </select>
+          <div class="timer-display"></div>
+          <div class="btn-group">
+            <button class="btn btn-start">Mulai</button>
+            <button class="btn btn-pause" disabled>Jeda</button>
+            <button class="btn btn-resume" disabled>Lanjut</button>
+            <button class="btn btn-stop" disabled>Stop</button>
+            <button class="btn btn-cancel" disabled>Cancel</button>
+          </div>
+        </div>
+
+        <div class="device" id="TV6">
+          <h3>TV 6 (PS3)</h3>
+          <select>
+            <option value="10">10 Menit (Gratis)</option>
+            <option value="30">30 Menit (Rp5.000)</option>
+            <option value="60">1 Jam (Rp9.000)</option>
+            <option value="90">1 Jam 30 Menit (Rp14.000)</option>
+            <option value="120">2 Jam (Rp18.000)</option>
+            <option value="150">2 Jam 30 Menit (Rp23.000)</option>
+            <option value="180">3 Jam (Rp27.000)</option>
+          </select>
+          <div class="timer-display"></div>
+          <div class="btn-group">
+            <button class="btn btn-start">Mulai</button>
+            <button class="btn btn-pause" disabled>Jeda</button>
+            <button class="btn btn-resume" disabled>Lanjut</button>
+            <button class="btn btn-stop" disabled>Stop</button>
+            <button class="btn btn-cancel" disabled>Cancel</button>
+          </div>
+        </div>
+
+        <div class="device" id="PS4">
+          <h3>PS4</h3>
+          <select>
+            <option value="10">10 Menit (Gratis)</option>
+            <option value="30">30 Menit (Rp7.000)</option>
+            <option value="60">1 Jam (Rp13.000)</option>
+            <option value="90">1 Jam 30 Menit (Rp20.000)</option>
+            <option value="120">2 Jam (Rp26.000)</option>
+            <option value="150">2 Jam 30 Menit (Rp33.000)</option>
+            <option value="180">3 Jam (Rp39.000)</option>
+          </select>
+          <div class="timer-display"></div>
+          <div class="btn-group">
+            <button class="btn btn-start">Mulai</button>
+            <button class="btn btn-pause" disabled>Jeda</button>
+            <button class="btn btn-resume" disabled>Lanjut</button>
+            <button class="btn btn-stop" disabled>Stop</button>
+            <button class="btn btn-cancel" disabled>Cancel</button>
+          </div>
         </div>
       </div>
-      <div class="part" id="part-TV2">
-        <h3>TV 2</h3>
-        <select aria-label="Select rental duration for TV 2"></select>
-        <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
-        <div class="btn-group">
-          <button class="btn btn-generate">Generate</button>
-          <button class="btn btn-pause" disabled>Pause</button>
-          <button class="btn btn-unpause" disabled>Unpause</button>
-          <button class="btn btn-cancel" disabled>Cancel</button>
-        </div>
+
+      <div class="receipt">
+        <h3><i class="fas fa-receipt"></i> Struk Pembayaran</h3>
+        <div id="receipt-content"></div>
+        <div class="total" id="total-amount">Total: Rp0</div>
+        <button class="btn btn-reset">
+          <i class="fas fa-trash-alt"></i> Reset Semua
+        </button>
       </div>
-      <div class="part" id="part-TV3">
-        <h3>TV 3</h3>
-        <select aria-label="Select rental duration for TV 3"></select>
-        <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
-        <div class="btn-group">
-          <button class="btn btn-generate">Generate</button>
-          <button class="btn btn-pause" disabled>Pause</button>
-          <button class="btn btn-unpause" disabled>Unpause</button>
-          <button class="btn btn-cancel" disabled>Cancel</button>
-        </div>
-      </div>
-      <div class="part" id="part-TV4">
-        <h3>TV 4</h3>
-        <select aria-label="Select rental duration for TV 4"></select>
-        <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
-        <div class="btn-group">
-          <button class="btn btn-generate">Generate</button>
-          <button class="btn btn-pause" disabled>Pause</button>
-          <button class="btn btn-unpause" disabled>Unpause</button>
-          <button class="btn btn-cancel" disabled>Cancel</button>
-        </div>
-      </div>
-      <div class="part" id="part-TV5">
-        <h3>TV 5</h3>
-        <select aria-label="Select rental duration for TV 5"></select>
-        <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
-        <div class="btn-group">
-          <button class="btn btn-generate">Generate</button>
-          <button class="btn btn-pause" disabled>Pause</button>
-          <button class="btn btn-unpause" disabled>Unpause</button>
-          <button class="btn btn-cancel" disabled>Cancel</button>
-        </div>
-      </div>
-      <div class="part" id="part-TV6">
-        <h3>TV 6</h3>
-        <select aria-label="Select rental duration for TV 6"></select>
-        <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
-        <div class="btn-group">
-          <button class="btn btn-generate">Generate</button>
-          <button class="btn btn-pause" disabled>Pause</button>
-          <button class="btn btn-unpause" disabled>Unpause</button>
-          <button class="btn btn-cancel" disabled>Cancel</button>
-        </div>
-      </div>
-      <div class="part" id="part-PS4">
-        <h3>PS4</h3>
-        <select aria-label="Select rental duration for PS4"></select>
-        <div class="timer-display" aria-live="polite" aria-atomic="true"></div>
-        <div class="btn-group">
-          <button class="btn btn-generate">Generate</button>
-          <button class="btn btn-pause" disabled>Pause</button>
-          <button class="btn btn-unpause" disabled>Unpause</button>
-          <button class="btn btn-cancel" disabled>Cancel</button>
-        </div>
-      </div>
-      <div
-        class="receipt"
-        id="receiptArea"
-        aria-live="polite"
-        tabindex="0"
-      ></div>
     </div>
+
     <script src="script.js"></script>
   </body>
 </html>
