@@ -1,298 +1,362 @@
-(() => {
-  const maxIncrements = 6;
+// Konfigurasi harga tetap
+const hargaPS3 = {
+  10: 0,
+  30: 5000,
+  60: 9000,
+  90: 14000,
+  120: 18000,
+  150: 23000,
+  180: 27000,
+};
 
-  function generateDurationsList(base30m, base1h, halfHourIncrement, count) {
-    const result = [];
-    result.push({ label: "10 Menit", price: 0 });
-    for (let i = 1; i <= count; i++) {
-      let label = "";
-      let hours = Math.floor(i / 2);
-      let minutes = (i % 2) * 30;
-      if (hours > 0) label += hours + (hours === 1 ? " Jam " : " Jam ");
-      if (minutes > 0) label += minutes + " Menit";
-      if (label === "") label = "0 Menit";
-      let price = 0;
-      if (i === 1) price = base30m;
-      else if (i === 2) price = base1h;
-      else price = base1h + (i - 2) * halfHourIncrement;
-      price = Math.ceil(price / 1000) * 1000;
-      result.push({ label, price });
-    }
-    return result;
-  }
+const hargaPS4 = {
+  10: 0,
+  30: 7000,
+  60: 13000,
+  90: 20000,
+  120: 26000,
+  150: 33000,
+  180: 39000,
+};
 
-  const ps3Durations = generateDurationsList(5000, 9000, 4500, maxIncrements);
-  const ps4Durations = generateDurationsList(7000, 13000, 6500, maxIncrements);
+// Data billing
+let dataBilling = JSON.parse(localStorage.getItem("billingData")) || {
+  aktif: {},
+  riwayat: {},
+  total: 0,
+};
 
-  const parts = {
-    "part-TV1": "ps3",
-    "part-TV2": "ps3",
-    "part-TV3": "ps3",
-    "part-TV4": "ps3",
-    "part-TV5": "ps3",
-    "part-TV6": "ps3",
-    "part-PS4": "ps4",
-  };
+const perangkat = ["TV1", "TV2", "TV3", "TV4", "TV5", "TV6", "PS4"];
 
-  let countdowns = {};
-  let paused = {};
-  let timerInterval = null;
+// Format Rupiah
+function formatRupiah(angka) {
+  return "Rp" + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
 
-  let billingHistory = {
-    TV1: [],
-    TV2: [],
-    TV3: [],
-    TV4: [],
-    TV5: [],
-    TV6: [],
-    PS4: [],
-  };
+// Format waktu
+function formatWaktu(detik) {
+  const menit = Math.floor(detik / 60);
+  const detikSisa = detik % 60;
+  return `${menit.toString().padStart(2, "0")}:${detikSisa
+    .toString()
+    .padStart(2, "0")}`;
+}
 
-  function formatRupiah(num) {
-    return "Rp" + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  }
+// Update timer
+function updateTimer() {
+  const sekarang = Math.floor(Date.now() / 1000);
 
-  function formatTime(seconds) {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return m.toString().padStart(2, "0") + ":" + s.toString().padStart(2, "0");
-  }
+  perangkat.forEach((device) => {
+    const timerDisplay = document.querySelector(`#${device} .timer-display`);
+    const aktif = dataBilling.aktif[device];
 
-  function labelToMinutes(label) {
-    if (label === "10 Menit") return 10;
-    const hrMatch = label.match(/(\d+)\s*Jam/);
-    const mnMatch = label.match(/(\d+)\s*Menit/);
-    let total = 0;
-    if (hrMatch) total += parseInt(hrMatch[1]) * 60;
-    if (mnMatch) total += parseInt(mnMatch[1]);
-    return total;
-  }
-
-  function initSelects() {
-    Object.keys(parts).forEach((partId) => {
-      const container = document.getElementById(partId);
-      const select = container.querySelector("select");
-      select.innerHTML = "";
-      const durations = parts[partId] === "ps3" ? ps3Durations : ps4Durations;
-      durations.forEach((dur) => {
-        const option = document.createElement("option");
-        option.value = dur.label;
-        option.textContent =
-          dur.price > 0
-            ? `${dur.label} (${formatRupiah(dur.price)})`
-            : dur.label;
-        select.appendChild(option);
-      });
-      select.addEventListener("change", () => {
-        container.querySelector(".timer-display").textContent = "";
-      });
-    });
-  }
-
-  function updateTimers() {
-    const now = Date.now();
-    let anyActive = false;
-    Object.keys(parts).forEach((partId) => {
-      const container = document.getElementById(partId);
-      const timerDisplay = container.querySelector(".timer-display");
-      const key = partId.replace("part-", "");
-      if (!billingHistory[key] || billingHistory[key].length === 0) {
-        timerDisplay.textContent = "";
+    if (aktif) {
+      if (aktif.dijeda) {
+        timerDisplay.textContent = "Dijeda";
+        timerDisplay.classList.remove("timer-warning");
         return;
       }
-      if (paused[partId]) {
-        timerDisplay.textContent = "Paused";
-        anyActive = true;
-        return;
-      }
-      const endTime = countdowns[partId];
-      if (endTime && endTime > now) {
-        const secondsLeft = Math.floor((endTime - now) / 1000);
-        timerDisplay.textContent = "Time left: " + formatTime(secondsLeft);
-        anyActive = true;
-      } else if (endTime) {
-        timerDisplay.textContent = "Time's up! ⏰";
-        delete countdowns[partId];
-        renderReceipt();
+
+      const sisaWaktu = aktif.waktuSelesai - sekarang;
+
+      if (sisaWaktu < 60) {
+        timerDisplay.classList.add("timer-warning");
       } else {
-        timerDisplay.textContent = "";
+        timerDisplay.classList.remove("timer-warning");
       }
-    });
-    if (!anyActive && timerInterval) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-    }
-  }
 
-  function startTimerInterval() {
-    if (timerInterval) return;
-    timerInterval = setInterval(updateTimers, 1000);
-  }
-
-  function renderReceipt() {
-    const receiptArea = document.getElementById("receiptArea");
-    receiptArea.innerHTML = "";
-    const activeDevices = Object.entries(billingHistory).filter(
-      ([, bills]) => bills.length > 0
-    );
-    if (activeDevices.length === 0) {
-      receiptArea.textContent = "No active bills.";
-      return;
-    }
-    activeDevices.forEach(([device, bills]) => {
-      const section = document.createElement("div");
-      section.className = "receipt-section";
-      const header = document.createElement("div");
-      header.className = "receipt-section-header";
-      header.textContent = device;
-      const lines = document.createElement("pre");
-      lines.className = "receipt-lines";
-      lines.textContent = bills
-        .map(
-          (b, i) =>
-            `#${i + 1}: Duration: ${b.duration} | Price: ${formatRupiah(
-              b.price
-            )}`
-        )
-        .join("\n");
-      section.appendChild(header);
-      section.appendChild(lines);
-      receiptArea.appendChild(section);
-    });
-    const totalSum = activeDevices.reduce(
-      (acc, [, bills]) => acc + bills.reduce((a, b) => a + b.price, 0),
-      0
-    );
-    const totalDiv = document.createElement("div");
-    totalDiv.className = "total-overall";
-    totalDiv.textContent = "TOTAL: " + formatRupiah(totalSum);
-    receiptArea.appendChild(totalDiv);
-  }
-
-  function generateBillForPart(partId) {
-    const partType = parts[partId];
-    const container = document.getElementById(partId);
-    const select = container.querySelector("select");
-    const selectedLabel = select.value;
-    if (!selectedLabel) {
-      alert(
-        `Please select duration for ${
-          container.querySelector("h3").textContent
-        }!`
-      );
-      select.focus();
-      return null;
-    }
-    const durations = partType === "ps3" ? ps3Durations : ps4Durations;
-    const dur = durations.find((d) => d.label === selectedLabel);
-    if (!dur) {
-      alert("Invalid duration selected");
-      select.focus();
-      return null;
-    }
-    const price = dur.price;
-    const minutes = labelToMinutes(dur.label);
-    countdowns[partId] = Date.now() + minutes * 60000;
-    delete paused[partId];
-    const key = partId.replace("part-", "");
-    billingHistory[key].push({ duration: dur.label, price: price });
-    updateTimers();
-    startTimerInterval();
-    return {
-      device: container.querySelector("h3").textContent,
-      duration: dur.label,
-      price,
-    };
-  }
-
-  Object.keys(parts).forEach((partId) => {
-    const container = document.getElementById(partId);
-    const generateBtn = container.querySelector(".btn-generate");
-    const pauseBtn = container.querySelector(".btn-pause");
-    const unpauseBtn = container.querySelector(".btn-unpause");
-    const cancelBtn = container.querySelector(".btn-cancel");
-
-    generateBtn.addEventListener("click", () => {
-      const bill = generateBillForPart(partId);
-      if (!bill) return;
-      pauseBtn.disabled = false;
-      cancelBtn.disabled = false;
-      unpauseBtn.disabled = true;
-      renderReceipt();
-    });
-
-    pauseBtn.addEventListener("click", () => {
-      if (!countdowns[partId]) return;
-      if (paused[partId]) return;
-      const remaining = countdowns[partId] - Date.now();
-      if (remaining <= 0) return;
-      paused[partId] = remaining;
-      delete countdowns[partId];
-      updateTimers();
-      pauseBtn.disabled = true;
-      unpauseBtn.disabled = false;
-    });
-
-    unpauseBtn.addEventListener("click", () => {
-      if (!paused[partId]) return;
-      countdowns[partId] = Date.now() + paused[partId];
-      delete paused[partId];
-      updateTimers();
-      startTimerInterval();
-      pauseBtn.disabled = false;
-      unpauseBtn.disabled = true;
-    });
-
-    cancelBtn.addEventListener("click", () => {
-      delete countdowns[partId];
-      delete paused[partId];
-      updateTimers();
-      const key = partId.replace("part-", "");
-      if (billingHistory[key] && billingHistory[key].length > 0) {
-        billingHistory[key].pop();
+      if (sisaWaktu > 0) {
+        timerDisplay.textContent = `Sisa: ${formatWaktu(sisaWaktu)}`;
+      } else {
+        selesaikanSesi(device);
       }
-      renderReceipt();
-      pauseBtn.disabled = billingHistory[key].length === 0;
-      unpauseBtn.disabled = true;
-      cancelBtn.disabled = billingHistory[key].length === 0;
-    });
-
-    pauseBtn.disabled = true;
-    unpauseBtn.disabled = true;
-    cancelBtn.disabled = true;
+    } else {
+      timerDisplay.textContent = "";
+      timerDisplay.classList.remove("timer-warning");
+    }
   });
 
-  // Event listeners for Pause All and Unpause All buttons
-  document.getElementById("pauseAllBtn").addEventListener("click", () => {
-    Object.keys(parts).forEach((partId) => {
-      if (countdowns[partId] && !paused[partId]) {
-        const remaining = countdowns[partId] - Date.now();
-        if (remaining > 0) {
-          paused[partId] = remaining;
-          delete countdowns[partId];
+  localStorage.setItem("billingData", JSON.stringify(dataBilling));
+}
+
+// Selesaikan sesi
+function selesaikanSesi(device) {
+  if (!dataBilling.riwayat[device]) dataBilling.riwayat[device] = [];
+
+  const durasiAwalMenit = dataBilling.aktif[device].durasi / 60;
+  const jenis = device === "PS4" ? "PS4" : "PS3";
+  const hargaPerangkat = jenis === "PS4" ? hargaPS4 : hargaPS3;
+  const harga = hargaPerangkat[durasiAwalMenit];
+
+  dataBilling.riwayat[device].push({
+    durasi: dataBilling.aktif[device].durasi,
+    harga: harga,
+    waktuMulai: dataBilling.aktif[device].waktuMulai,
+    waktuSelesai: Math.floor(Date.now() / 1000),
+  });
+
+  delete dataBilling.aktif[device];
+
+  const timerDisplay = document.querySelector(`#${device} .timer-display`);
+  timerDisplay.textContent = "Waktu Habis";
+
+  setTimeout(() => {
+    timerDisplay.textContent = "";
+    updateTombol(device);
+    updateStruk();
+  }, 3000);
+}
+
+// Update tombol
+function updateTombol(device) {
+  const aktif = dataBilling.aktif[device];
+  const dijeda = aktif && aktif.dijeda;
+
+  const startBtn = document.querySelector(`#${device} .btn-start`);
+  const pauseBtn = document.querySelector(`#${device} .btn-pause`);
+  const resumeBtn = document.querySelector(`#${device} .btn-resume`);
+  const stopBtn = document.querySelector(`#${device} .btn-stop`);
+  const cancelBtn = document.querySelector(`#${device} .btn-cancel`);
+
+  startBtn.disabled = !!aktif;
+  pauseBtn.disabled = !aktif || dijeda;
+  resumeBtn.disabled = !dijeda;
+  stopBtn.disabled = !aktif;
+  cancelBtn.disabled = !aktif;
+}
+
+// Update struk
+function updateStruk() {
+  const receiptContent = document.getElementById("receipt-content");
+  receiptContent.innerHTML = "";
+
+  let total = 0;
+  let adaTransaksi = false;
+
+  perangkat.forEach((device) => {
+    if (dataBilling.riwayat[device] && dataBilling.riwayat[device].length > 0) {
+      adaTransaksi = true;
+
+      const deviceContainer = document.createElement("div");
+      deviceContainer.className = "device-transactions";
+
+      const deviceHeader = document.createElement("div");
+      deviceHeader.className = "device-header";
+      deviceHeader.textContent = device;
+      deviceContainer.appendChild(deviceHeader);
+
+      const transaksiList = document.createElement("div");
+      transaksiList.className = "transaksi-list";
+
+      dataBilling.riwayat[device].forEach((transaksi, index) => {
+        const transaksiItem = document.createElement("div");
+        transaksiItem.className = "transaksi-item";
+
+        const durasiMenit = Math.ceil(transaksi.durasi / 60);
+        const waktu = new Date(
+          transaksi.waktuSelesai * 1000
+        ).toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        transaksiItem.innerHTML = `
+          <div class="transaksi-number">${index + 1}.</div>
+          <div class="transaksi-duration">${durasiMenit} Menit</div>
+          <div class="transaksi-time">(${waktu})</div>
+          <div class="transaksi-price">${formatRupiah(transaksi.harga)}</div>
+        `;
+
+        transaksiList.appendChild(transaksiItem);
+        total += transaksi.harga;
+      });
+
+      deviceContainer.appendChild(transaksiList);
+      receiptContent.appendChild(deviceContainer);
+    }
+  });
+
+  if (!adaTransaksi) {
+    receiptContent.innerHTML =
+      '<div class="no-transaction">Belum ada transaksi</div>';
+  }
+
+  document.getElementById("total-amount").textContent = `Total: ${formatRupiah(
+    total
+  )}`;
+  dataBilling.total = total;
+}
+
+// Setup event listeners
+function setupEventListeners() {
+  perangkat.forEach((device) => {
+    const jenis = device === "PS4" ? "PS4" : "PS3";
+    const hargaPerangkat = jenis === "PS4" ? hargaPS4 : hargaPS3;
+
+    // Tombol Mulai
+    document
+      .querySelector(`#${device} .btn-start`)
+      .addEventListener("click", () => {
+        const select = document.querySelector(`#${device} select`);
+        const durasiMenit = parseInt(select.value);
+        const harga = hargaPerangkat[durasiMenit];
+
+        dataBilling.aktif[device] = {
+          durasi: durasiMenit * 60,
+          harga: harga,
+          waktuMulai: Math.floor(Date.now() / 1000),
+          waktuSelesai: Math.floor(Date.now() / 1000) + durasiMenit * 60,
+          dijeda: false,
+        };
+
+        updateTimer();
+        updateTombol(device);
+        updateStruk();
+      });
+
+    // Tombol Jeda
+    document
+      .querySelector(`#${device} .btn-pause`)
+      .addEventListener("click", () => {
+        if (dataBilling.aktif[device]) {
+          dataBilling.aktif[device].dijeda = true;
+          dataBilling.aktif[device].sisaDijeda =
+            dataBilling.aktif[device].waktuSelesai -
+            Math.floor(Date.now() / 1000);
+          updateTombol(device);
+          updateTimer();
         }
-      }
-    });
-    updateTimers();
-    renderReceipt();
-    document.getElementById("pauseAllBtn").style.display = "none";
-    document.getElementById("unpauseAllBtn").style.display = "block";
+      });
+
+    // Tombol Lanjut
+    document
+      .querySelector(`#${device} .btn-resume`)
+      .addEventListener("click", () => {
+        if (dataBilling.aktif[device] && dataBilling.aktif[device].dijeda) {
+          dataBilling.aktif[device].dijeda = false;
+          dataBilling.aktif[device].waktuSelesai =
+            Math.floor(Date.now() / 1000) +
+            dataBilling.aktif[device].sisaDijeda;
+          updateTombol(device);
+          updateTimer();
+        }
+      });
+
+    // Tombol Stop
+    document
+      .querySelector(`#${device} .btn-stop`)
+      .addEventListener("click", () => {
+        if (dataBilling.aktif[device]) {
+          const durasiAwalMenit = dataBilling.aktif[device].durasi / 60;
+          const hargaDibayar = hargaPerangkat[durasiAwalMenit];
+
+          if (!dataBilling.riwayat[device]) dataBilling.riwayat[device] = [];
+          dataBilling.riwayat[device].push({
+            durasi: dataBilling.aktif[device].durasi,
+            harga: hargaDibayar,
+            waktuMulai: dataBilling.aktif[device].waktuMulai,
+            waktuSelesai: Math.floor(Date.now() / 1000),
+          });
+
+          delete dataBilling.aktif[device];
+
+          const timerDisplay = document.querySelector(
+            `#${device} .timer-display`
+          );
+          timerDisplay.textContent = "Dihentikan";
+          setTimeout(() => {
+            timerDisplay.textContent = "";
+            updateTombol(device);
+            updateStruk();
+          }, 2000);
+        }
+      });
+
+    // Tombol Cancel
+    document
+      .querySelector(`#${device} .btn-cancel`)
+      .addEventListener("click", () => {
+        if (dataBilling.aktif[device]) {
+          delete dataBilling.aktif[device];
+
+          const timerDisplay = document.querySelector(
+            `#${device} .timer-display`
+          );
+          timerDisplay.textContent = "Dibatalkan";
+          setTimeout(() => {
+            timerDisplay.textContent = "";
+            updateTombol(device);
+          }, 2000);
+        }
+      });
   });
 
-  document.getElementById("unpauseAllBtn").addEventListener("click", () => {
-    Object.keys(parts).forEach((partId) => {
-      if (paused[partId]) {
-        countdowns[partId] = Date.now() + paused[partId];
-        delete paused[partId];
-      }
-    });
-    startTimerInterval();
-    updateTimers();
-    document.getElementById("unpauseAllBtn").style.display = "none";
-    document.getElementById("pauseAllBtn").style.display = "block";
+  // Tombol Reset
+  document.querySelector(".btn-reset").addEventListener("click", function () {
+    if (
+      confirm(
+        "Apakah Anda yakin ingin mereset semua transaksi? Semua data akan hilang."
+      )
+    ) {
+      dataBilling = {
+        aktif: {},
+        riwayat: {},
+        total: 0,
+      };
+
+      perangkat.forEach((device) => {
+        const timerDisplay = document.querySelector(
+          `#${device} .timer-display`
+        );
+        timerDisplay.textContent = "";
+      });
+
+      localStorage.setItem("billingData", JSON.stringify(dataBilling));
+
+      perangkat.forEach((device) => {
+        updateTombol(device);
+      });
+      updateStruk();
+    }
   });
 
-  initSelects();
-  updateTimers();
-  renderReceipt();
-})();
+  // Tombol Dark Mode
+  const darkModeToggle = document.createElement("button");
+  darkModeToggle.className = "btn btn-theme-toggle";
+  darkModeToggle.innerHTML = '<i class="fas fa-moon"></i> Mode Gelap';
+  darkModeToggle.addEventListener("click", toggleDarkMode);
+  document.querySelector(".container").prepend(darkModeToggle);
+}
+
+// Toggle Dark Mode
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+  localStorage.setItem(
+    "darkMode",
+    document.body.classList.contains("dark-mode")
+  );
+
+  const toggleBtn = document.querySelector(".btn-theme-toggle");
+  if (document.body.classList.contains("dark-mode")) {
+    toggleBtn.innerHTML = '<i class="fas fa-sun"></i> Mode Terang';
+  } else {
+    toggleBtn.innerHTML = '<i class="fas fa-moon"></i> Mode Gelap';
+  }
+}
+
+// Inisialisasi
+function init() {
+  if (localStorage.getItem("darkMode") === "true") {
+    document.body.classList.add("dark-mode");
+  }
+
+  setupEventListeners();
+  setInterval(updateTimer, 1000);
+  updateStruk();
+
+  perangkat.forEach((device) => {
+    updateTombol(device);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", init);
