@@ -37,7 +37,9 @@ function formatRupiah(angka) {
 function formatWaktu(detik) {
   const menit = Math.floor(detik / 60);
   const detikSisa = detik % 60;
-  return `${menit.toString().padStart(2, "0")}:${detikSisa.toString().padStart(2, "0")}`;
+  return `${menit.toString().padStart(2, "0")}:${detikSisa
+    .toString()
+    .padStart(2, "0")}`;
 }
 
 // Update timer
@@ -119,10 +121,13 @@ function updateStruk() {
         transaksiItem.className = "transaksi-item";
 
         const durasiMenit = Math.ceil(transaksi.durasi / 60);
-        const waktu = new Date(transaksi.waktuMulai * 1000).toLocaleTimeString("id-ID", {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+        const waktu = new Date(transaksi.waktuMulai * 1000).toLocaleTimeString(
+          "id-ID",
+          {
+            hour: "2-digit",
+            minute: "2-digit",
+          }
+        );
 
         transaksiItem.innerHTML = `
           <div class="transaksi-number">${index + 1}.</div>
@@ -141,10 +146,13 @@ function updateStruk() {
   });
 
   if (!adaTransaksi) {
-    receiptContent.innerHTML = '<div class="no-transaction">Belum ada transaksi</div>';
+    receiptContent.innerHTML =
+      '<div class="no-transaction">Belum ada transaksi</div>';
   }
 
-  document.getElementById("total-amount").textContent = `Total: ${formatRupiah(total)}`;
+  document.getElementById("total-amount").textContent = `Total: ${formatRupiah(
+    total
+  )}`;
   dataBilling.total = total;
   localStorage.setItem("billingData", JSON.stringify(dataBilling));
 }
@@ -156,81 +164,99 @@ function setupEventListeners() {
     const hargaPerangkat = jenis === "PS4" ? hargaPS4 : hargaPS3;
 
     // Tombol Mulai
-    document.querySelector(`#${device} .btn-start`).addEventListener("click", () => {
-      const select = document.querySelector(`#${device} select`);
-      const durasiMenit = parseInt(select.value);
-      const harga = hargaPerangkat[durasiMenit];
+    document
+      .querySelector(`#${device} .btn-start`)
+      .addEventListener("click", () => {
+        const select = document.querySelector(`#${device} select`);
+        const durasiMenit = parseInt(select.value);
+        const harga = hargaPerangkat[durasiMenit];
 
-      // Langsung tambahkan ke riwayat
-      if (!dataBilling.riwayat[device]) dataBilling.riwayat[device] = [];
-      dataBilling.riwayat[device].push({
-        durasi: durasiMenit * 60,
-        harga: harga,
-        waktuMulai: Math.floor(Date.now() / 1000),
-        waktuSelesai: Math.floor(Date.now() / 1000) + durasiMenit * 60,
+        // Langsung tambahkan ke riwayat
+        if (!dataBilling.riwayat[device]) dataBilling.riwayat[device] = [];
+        dataBilling.riwayat[device].push({
+          durasi: durasiMenit * 60,
+          harga: harga,
+          waktuMulai: Math.floor(Date.now() / 1000),
+          waktuSelesai: Math.floor(Date.now() / 1000) + durasiMenit * 60,
+        });
+
+        // Mulai timer
+        dataBilling.aktif[device] = {
+          durasi: durasiMenit * 60,
+          waktuSelesai: Math.floor(Date.now() / 1000) + durasiMenit * 60,
+          dijeda: false,
+        };
+
+        updateTimer();
+        updateTombol(device);
+        updateStruk();
       });
 
-      // Mulai timer
-      dataBilling.aktif[device] = {
-        durasi: durasiMenit * 60,
-        waktuSelesai: Math.floor(Date.now() / 1000) + durasiMenit * 60,
-        dijeda: false
-      };
-
-      updateTimer();
-      updateTombol(device);
-      updateStruk();
-    });
-
     // Tombol Jeda
-    document.querySelector(`#${device} .btn-pause`).addEventListener("click", () => {
-      if (dataBilling.aktif[device]) {
-        dataBilling.aktif[device].dijeda = true;
-        dataBilling.aktif[device].sisaDijeda = dataBilling.aktif[device].waktuSelesai - Math.floor(Date.now() / 1000);
-        updateTombol(device);
-        updateTimer();
-      }
-    });
+    document
+      .querySelector(`#${device} .btn-pause`)
+      .addEventListener("click", () => {
+        if (dataBilling.aktif[device]) {
+          dataBilling.aktif[device].dijeda = true;
+          dataBilling.aktif[device].sisaDijeda =
+            dataBilling.aktif[device].waktuSelesai -
+            Math.floor(Date.now() / 1000);
+          updateTombol(device);
+          updateTimer();
+        }
+      });
 
     // Tombol Lanjut
-    document.querySelector(`#${device} .btn-resume`).addEventListener("click", () => {
-      if (dataBilling.aktif[device]?.dijeda) {
-        dataBilling.aktif[device].dijeda = false;
-        dataBilling.aktif[device].waktuSelesai = Math.floor(Date.now() / 1000) + dataBilling.aktif[device].sisaDijeda;
-        updateTombol(device);
-        updateTimer();
-      }
-    });
+    document
+      .querySelector(`#${device} .btn-resume`)
+      .addEventListener("click", () => {
+        if (dataBilling.aktif[device]?.dijeda) {
+          dataBilling.aktif[device].dijeda = false;
+          dataBilling.aktif[device].waktuSelesai =
+            Math.floor(Date.now() / 1000) +
+            dataBilling.aktif[device].sisaDijeda;
+          updateTombol(device);
+          updateTimer();
+        }
+      });
 
     // Tombol Stop
-    document.querySelector(`#${device} .btn-stop`).addEventListener("click", () => {
-      if (dataBilling.aktif[device]) {
-        delete dataBilling.aktif[device];
-        document.querySelector(`#${device} .timer-display`).textContent = "Dihentikan";
-        setTimeout(() => {
-          document.querySelector(`#${device} .timer-display`).textContent = "";
-          updateTombol(device);
-        }, 2000);
-      }
-    });
+    document
+      .querySelector(`#${device} .btn-stop`)
+      .addEventListener("click", () => {
+        if (dataBilling.aktif[device]) {
+          delete dataBilling.aktif[device];
+          document.querySelector(`#${device} .timer-display`).textContent =
+            "Dihentikan";
+          setTimeout(() => {
+            document.querySelector(`#${device} .timer-display`).textContent =
+              "";
+            updateTombol(device);
+          }, 2000);
+        }
+      });
 
     // Tombol Cancel
-    document.querySelector(`#${device} .btn-cancel`).addEventListener("click", () => {
-      if (dataBilling.aktif[device]) {
-        // Hapus transaksi terakhir
-        if (dataBilling.riwayat[device]?.length > 0) {
-          dataBilling.riwayat[device].pop();
+    document
+      .querySelector(`#${device} .btn-cancel`)
+      .addEventListener("click", () => {
+        if (dataBilling.aktif[device]) {
+          // Hapus transaksi terakhir
+          if (dataBilling.riwayat[device]?.length > 0) {
+            dataBilling.riwayat[device].pop();
+          }
+
+          delete dataBilling.aktif[device];
+          document.querySelector(`#${device} .timer-display`).textContent =
+            "Dibatalkan";
+          setTimeout(() => {
+            document.querySelector(`#${device} .timer-display`).textContent =
+              "";
+            updateTombol(device);
+            updateStruk();
+          }, 2000);
         }
-        
-        delete dataBilling.aktif[device];
-        document.querySelector(`#${device} .timer-display`).textContent = "Dibatalkan";
-        setTimeout(() => {
-          document.querySelector(`#${device} .timer-display`).textContent = "";
-          updateTombol(device);
-          updateStruk();
-        }, 2000);
-      }
-    });
+      });
   });
 
   // Tombol Reset
@@ -238,7 +264,7 @@ function setupEventListeners() {
     if (confirm("Reset semua transaksi dan timer?")) {
       dataBilling = { aktif: {}, riwayat: {}, total: 0 };
       localStorage.setItem("billingData", JSON.stringify(dataBilling));
-      perangkat.forEach(device => {
+      perangkat.forEach((device) => {
         document.querySelector(`#${device} .timer-display`).textContent = "";
         updateTombol(device);
       });
@@ -257,11 +283,14 @@ function setupEventListeners() {
 // Toggle Dark Mode
 function toggleDarkMode() {
   document.body.classList.toggle("dark-mode");
-  localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
-  
+  localStorage.setItem(
+    "darkMode",
+    document.body.classList.contains("dark-mode")
+  );
+
   const toggleBtn = document.querySelector(".btn-theme-toggle");
-  toggleBtn.innerHTML = document.body.classList.contains("dark-mode") 
-    ? '<i class="fas fa-sun"></i> Mode Terang' 
+  toggleBtn.innerHTML = document.body.classList.contains("dark-mode")
+    ? '<i class="fas fa-sun"></i> Mode Terang'
     : '<i class="fas fa-moon"></i> Mode Gelap';
 }
 
@@ -274,7 +303,8 @@ function init() {
   setupEventListeners();
   setInterval(updateTimer, 1000);
   updateStruk();
-  perangkat.forEach(device => updateTombol(device));
+  perangkat.forEach((device) => updateTombol(device));
 }
 
+// Pastikan DOM sudah selesai dimuat
 document.addEventListener("DOMContentLoaded", init);
