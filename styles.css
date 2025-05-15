@@ -1,280 +1,313 @@
-// Konfigurasi harga tetap
-const hargaPS3 = {
-  10: 0,
-  30: 5000,
-  60: 9000,
-  90: 14000,
-  120: 18000,
-  150: 23000,
-  180: 27000,
-};
-
-const hargaPS4 = {
-  10: 0,
-  30: 7000,
-  60: 13000,
-  90: 20000,
-  120: 26000,
-  150: 33000,
-  180: 39000,
-};
-
-// Data billing
-let dataBilling = JSON.parse(localStorage.getItem("billingData")) || {
-  aktif: {},
-  riwayat: {},
-  total: 0,
-};
-
-const perangkat = ["TV1", "TV2", "TV3", "TV4", "TV5", "TV6", "PS4"];
-
-// Format Rupiah
-function formatRupiah(angka) {
-  return "Rp" + angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-// Format waktu
-function formatWaktu(detik) {
-  const menit = Math.floor(detik / 60);
-  const detikSisa = detik % 60;
-  return `${menit.toString().padStart(2, "0")}:${detikSisa.toString().padStart(2, "0")}`;
+body {
+  background-color: #f0f2f5;
+  color: #333;
+  padding: 20px;
 }
 
-// Update timer
-function updateTimer() {
-  const sekarang = Math.floor(Date.now() / 1000);
-
-  perangkat.forEach((device) => {
-    const timerDisplay = document.querySelector(`#${device} .timer-display`);
-    const aktif = dataBilling.aktif[device];
-
-    if (aktif) {
-      if (aktif.dijeda) {
-        timerDisplay.textContent = "Dijeda";
-        timerDisplay.classList.remove("timer-warning");
-        return;
-      }
-
-      const sisaWaktu = aktif.waktuSelesai - sekarang;
-
-      if (sisaWaktu < 60) {
-        timerDisplay.classList.add("timer-warning");
-      } else {
-        timerDisplay.classList.remove("timer-warning");
-      }
-
-      if (sisaWaktu > 0) {
-        timerDisplay.textContent = `Sisa: ${formatWaktu(sisaWaktu)}`;
-      } else {
-        delete dataBilling.aktif[device];
-        timerDisplay.textContent = "Waktu Habis";
-        setTimeout(() => {
-          timerDisplay.textContent = "";
-          updateTombol(device);
-        }, 3000);
-      }
-    }
-  });
-
-  localStorage.setItem("billingData", JSON.stringify(dataBilling));
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  padding: 20px;
 }
 
-// Update tombol
-function updateTombol(device) {
-  const aktif = dataBilling.aktif[device];
-  const dijeda = aktif && aktif.dijeda;
-
-  document.querySelector(`#${device} .btn-start`).disabled = !!aktif;
-  document.querySelector(`#${device} .btn-pause`).disabled = !aktif || dijeda;
-  document.querySelector(`#${device} .btn-resume`).disabled = !dijeda;
-  document.querySelector(`#${device} .btn-stop`).disabled = !aktif;
-  document.querySelector(`#${device} .btn-cancel`).disabled = !aktif;
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #2c3e50;
 }
 
-// Update struk
-function updateStruk() {
-  const receiptContent = document.getElementById("receipt-content");
-  receiptContent.innerHTML = "";
+.devices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
 
-  let total = 0;
-  let adaTransaksi = false;
+.device {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+}
 
-  perangkat.forEach((device) => {
-    if (dataBilling.riwayat[device] && dataBilling.riwayat[device].length > 0) {
-      adaTransaksi = true;
+.device:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
 
-      const deviceContainer = document.createElement("div");
-      deviceContainer.className = "device-transactions";
+.device h3 {
+  color: #3498db;
+  margin-bottom: 15px;
+  text-align: center;
+}
 
-      const deviceHeader = document.createElement("div");
-      deviceHeader.className = "device-header";
-      deviceHeader.textContent = device;
-      deviceContainer.appendChild(deviceHeader);
+select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+}
 
-      const transaksiList = document.createElement("div");
-      transaksiList.className = "transaksi-list";
+select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
 
-      dataBilling.riwayat[device].forEach((transaksi, index) => {
-        const transaksiItem = document.createElement("div");
-        transaksiItem.className = "transaksi-item";
+.timer-display {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #e74c3c;
+  margin: 10px 0;
+  min-height: 27px;
+  transition: all 0.5s ease;
+}
 
-        const durasiMenit = Math.ceil(transaksi.durasi / 60);
-        const waktu = new Date(transaksi.waktuMulai * 1000).toLocaleTimeString("id-ID", {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+.timer-warning {
+  animation: pulse 1s infinite;
+}
 
-        transaksiItem.innerHTML = `
-          <div class="transaksi-number">${index + 1}.</div>
-          <div class="transaksi-duration">${durasiMenit} Menit</div>
-          <div class="transaksi-time">(${waktu})</div>
-          <div class="transaksi-price">${formatRupiah(transaksi.harga)}</div>
-        `;
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 
-        transaksiList.appendChild(transaksiItem);
-        total += transaksi.harga;
-      });
+.btn-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
 
-      deviceContainer.appendChild(transaksiList);
-      receiptContent.appendChild(deviceContainer);
-    }
-  });
+.btn {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
 
-  if (!adaTransaksi) {
-    receiptContent.innerHTML = '<div class="no-transaction">Belum ada transaksi</div>';
+.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-start {
+  background-color: #2ecc71;
+  color: white;
+  grid-column: span 2;
+}
+
+.btn-pause {
+  background-color: #f39c12;
+  color: white;
+}
+
+.btn-resume {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-stop {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-cancel {
+  background-color: #95a5a6;
+  color: white;
+  grid-column: span 2;
+}
+
+.btn-reset {
+  background-color: #9b59b6;
+  color: white;
+  width: 100%;
+  margin-top: 15px;
+  padding: 12px;
+  font-size: 16px;
+}
+
+.btn-reset:hover {
+  background-color: #8e44ad;
+}
+
+.btn:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.receipt {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+  border: 1px solid #dee2e6;
+}
+
+.receipt h3 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.receipt h3 i {
+  font-size: 1.2em;
+}
+
+#receipt-content {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 15px;
+}
+
+.device-transactions {
+  margin-bottom: 20px;
+}
+
+.device-header {
+  font-size: 1.1em;
+  color: #3498db;
+  margin-bottom: 8px;
+  padding-bottom: 5px;
+  border-bottom: 1px dashed #ccc;
+}
+
+.transaksi-list {
+  padding-left: 20px;
+}
+
+.transaksi-item {
+  display: flex;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.transaksi-number {
+  min-width: 25px;
+  color: #7f8c8d;
+}
+
+.transaksi-duration {
+  font-weight: 500;
+  margin-right: 10px;
+}
+
+.transaksi-time {
+  color: #7f8c8d;
+  font-size: 0.9em;
+  margin-right: 10px;
+}
+
+.transaksi-price {
+  margin-left: auto;
+  font-weight: bold;
+  color: #27ae60;
+}
+
+.total {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: right;
+  margin-top: 15px;
+  color: #27ae60;
+  padding-top: 10px;
+  border-top: 2px solid #27ae60;
+}
+
+.no-transaction {
+  text-align: center;
+  color: #7f8c8d;
+  font-style: italic;
+  padding: 20px 0;
+}
+
+/* Dark Mode */
+.dark-mode {
+  background-color: #121212;
+  color: #f1f1f1;
+}
+
+.dark-mode .container {
+  background-color: #1e1e1e;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode .device {
+  background-color: #2d2d2d;
+  border-color: #444;
+}
+
+.dark-mode select {
+  background-color: #333;
+  color: #fff;
+  border-color: #444;
+}
+
+.dark-mode .receipt {
+  background: linear-gradient(135deg, #252525 0%, #333 100%);
+  border-color: #444;
+}
+
+.dark-mode .device-header {
+  border-bottom-color: #555;
+}
+
+@media (max-width: 768px) {
+  .devices-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .devices-grid {
+    grid-template-columns: 1fr;
   }
 
-  document.getElementById("total-amount").textContent = `Total: ${formatRupiah(total)}`;
-  dataBilling.total = total;
-  localStorage.setItem("billingData", JSON.stringify(dataBilling));
-}
-
-// Setup event listeners
-function setupEventListeners() {
-  perangkat.forEach((device) => {
-    const jenis = device === "PS4" ? "PS4" : "PS3";
-    const hargaPerangkat = jenis === "PS4" ? hargaPS4 : hargaPS3;
-
-    // Tombol Mulai
-    document.querySelector(`#${device} .btn-start`).addEventListener("click", () => {
-      const select = document.querySelector(`#${device} select`);
-      const durasiMenit = parseInt(select.value);
-      const harga = hargaPerangkat[durasiMenit];
-
-      // Langsung tambahkan ke riwayat
-      if (!dataBilling.riwayat[device]) dataBilling.riwayat[device] = [];
-      dataBilling.riwayat[device].push({
-        durasi: durasiMenit * 60,
-        harga: harga,
-        waktuMulai: Math.floor(Date.now() / 1000),
-        waktuSelesai: Math.floor(Date.now() / 1000) + durasiMenit * 60,
-      });
-
-      // Mulai timer
-      dataBilling.aktif[device] = {
-        durasi: durasiMenit * 60,
-        waktuSelesai: Math.floor(Date.now() / 1000) + durasiMenit * 60,
-        dijeda: false
-      };
-
-      updateTimer();
-      updateTombol(device);
-      updateStruk();
-    });
-
-    // Tombol Jeda
-    document.querySelector(`#${device} .btn-pause`).addEventListener("click", () => {
-      if (dataBilling.aktif[device]) {
-        dataBilling.aktif[device].dijeda = true;
-        dataBilling.aktif[device].sisaDijeda = dataBilling.aktif[device].waktuSelesai - Math.floor(Date.now() / 1000);
-        updateTombol(device);
-        updateTimer();
-      }
-    });
-
-    // Tombol Lanjut
-    document.querySelector(`#${device} .btn-resume`).addEventListener("click", () => {
-      if (dataBilling.aktif[device]?.dijeda) {
-        dataBilling.aktif[device].dijeda = false;
-        dataBilling.aktif[device].waktuSelesai = Math.floor(Date.now() / 1000) + dataBilling.aktif[device].sisaDijeda;
-        updateTombol(device);
-        updateTimer();
-      }
-    });
-
-    // Tombol Stop
-    document.querySelector(`#${device} .btn-stop`).addEventListener("click", () => {
-      if (dataBilling.aktif[device]) {
-        delete dataBilling.aktif[device];
-        document.querySelector(`#${device} .timer-display`).textContent = "Dihentikan";
-        setTimeout(() => {
-          document.querySelector(`#${device} .timer-display`).textContent = "";
-          updateTombol(device);
-        }, 2000);
-      }
-    });
-
-    // Tombol Cancel
-    document.querySelector(`#${device} .btn-cancel`).addEventListener("click", () => {
-      if (dataBilling.aktif[device]) {
-        // Hapus transaksi terakhir
-        if (dataBilling.riwayat[device]?.length > 0) {
-          dataBilling.riwayat[device].pop();
-        }
-        
-        delete dataBilling.aktif[device];
-        document.querySelector(`#${device} .timer-display`).textContent = "Dibatalkan";
-        setTimeout(() => {
-          document.querySelector(`#${device} .timer-display`).textContent = "";
-          updateTombol(device);
-          updateStruk();
-        }, 2000);
-      }
-    });
-  });
-
-  // Tombol Reset
-  document.querySelector(".btn-reset").addEventListener("click", () => {
-    if (confirm("Reset semua transaksi dan timer?")) {
-      dataBilling = { aktif: {}, riwayat: {}, total: 0 };
-      localStorage.setItem("billingData", JSON.stringify(dataBilling));
-      perangkat.forEach(device => {
-        document.querySelector(`#${device} .timer-display`).textContent = "";
-        updateTombol(device);
-      });
-      updateStruk();
-    }
-  });
-
-  // Tombol Dark Mode
-  const darkModeToggle = document.createElement("button");
-  darkModeToggle.className = "btn btn-theme-toggle";
-  darkModeToggle.innerHTML = '<i class="fas fa-moon"></i> Mode Gelap';
-  darkModeToggle.addEventListener("click", toggleDarkMode);
-  document.querySelector(".container").prepend(darkModeToggle);
-}
-
-// Toggle Dark Mode
-function toggleDarkMode() {
-  document.body.classList.toggle("dark-mode");
-  localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
-  
-  const toggleBtn = document.querySelector(".btn-theme-toggle");
-  toggleBtn.innerHTML = document.body.classList.contains("dark-mode") 
-    ? '<i class="fas fa-sun"></i> Mode Terang' 
-    : '<i class="fas fa-moon"></i> Mode Gelap';
-}
-
-// Inisialisasi
-function init() {
-  if (localStorage.getItem("darkMode") === "true") {
-    document.body.classList.add("dark-mode");
+  .btn-group {
+    grid-template-columns: 1fr;
   }
 
-  setupEventListeners();
-  setInterval(updateTimer, 1000);
-  updateStruk();
-  perangkat.forEach(device => updateTombol(device));
+  .btn-start,
+  .btn-cancel {
+    grid-column: span 1;
+  }
 }
-
-document.addEventListener("DOMContentLoaded", init);
